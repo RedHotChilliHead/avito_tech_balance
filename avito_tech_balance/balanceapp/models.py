@@ -6,7 +6,7 @@ class Customer(models.Model):
     Модель пользователя (для создания schema.sql)
     """
     name = models.CharField(max_length=100, blank=False)
-    balance = models.DecimalField(max_digits=99, decimal_places=2)
+    balance = models.DecimalField(max_digits=99, decimal_places=2, blank=False, null=False, default=0)
 
 
 class Transaction(models.Model):
@@ -15,7 +15,7 @@ class Transaction(models.Model):
     """
     amount = models.DecimalField(max_digits=99, decimal_places=2)
     timestamp = models.DateTimeField(auto_now=True)
-    description = models.CharField(max_length=150, blank=False)
+    description = models.CharField(max_length=150, blank=True, null=True)
     sender = models.ForeignKey(Customer, on_delete=models.DO_NOTHING, blank=True, null=True,
                                related_name='sent_transactions')  # отправитель
     recipient = models.ForeignKey(Customer, on_delete=models.DO_NOTHING, blank=True, null=True,
