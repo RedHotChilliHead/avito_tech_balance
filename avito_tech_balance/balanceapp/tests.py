@@ -11,6 +11,7 @@ from rest_framework.test import APITestCase
 from .models import Customer, Transaction
 
 
+# docker-compose run test
 class CustomerTestCase(APITestCase):
     def setUp(self):
         self.customer = Customer.objects.create(name="Den")
