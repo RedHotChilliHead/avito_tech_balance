@@ -1,7 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
-from balanceapp.views import CustomerViewSet, WithdrawDeposit, TransferView, TransactionViewSet
+from .views import CustomerViewSet, WithdrawDeposit, TransferView, TransactionViewSet
 
 app_name = "balanceapp"
 

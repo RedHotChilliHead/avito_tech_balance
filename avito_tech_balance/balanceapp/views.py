@@ -9,8 +9,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
-from balanceapp.models import Customer, Transaction
-from balanceapp.serializers import CustomerSerializer, TransactionSerializer
+from .models import Customer, Transaction
+from .serializers import CustomerSerializer, TransactionSerializer
 
 
 
@@ -70,7 +70,7 @@ class WithdrawDeposit(APIView):
         if not amount or not operation:  # если не передали все необходимые аргументы
             return Response({"error": "Amount and operation are required"}, status=status.HTTP_400_BAD_REQUEST)
 
-        if type(amount) is str or amount <= 0:  # если сумма отрицательная
+        if type(amount) is str or amount <= 0:  # если сумма некорректная
             return Response({"error": "The amount must be positive number"}, status=status.HTTP_400_BAD_REQUEST)
 
         if operation == 'withdraw':  # зачисление средств
@@ -104,16 +104,19 @@ class TransferView(APIView):
     def post(self, request):
         data = request.data
         amount = data.get('amount')
-        sender = get_object_or_404(Customer, pk=data.get('sender'))
-        recipient = get_object_or_404(Customer, pk=data.get('recipient'))
+        sender_id = data.get('sender')
+        recipient_id = data.get('recipient')
         description = data.get('description')
 
-        if not amount or not sender or not recipient:  # если не передали все необходимые аргументы
+        if not amount or not sender_id or not recipient_id:  # если не передали все необходимые аргументы
             return Response({"error": "Amount, sender and recipient are required"},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        if type(amount) is str:  # если сумма отрицательная
+        if type(amount) is str or amount < 0:  # если сумма некорректная
             return Response({"error": "The amount must be positive number"}, status=status.HTTP_400_BAD_REQUEST)
+
+        sender = get_object_or_404(Customer, pk=sender_id)
+        recipient = get_object_or_404(Customer, pk=recipient_id)
 
         if sender.balance < Decimal(amount):
             return Response({"error": "There are not enough funds in the account"},
@@ -132,7 +135,7 @@ class TransactionViewSet(ReadOnlyModelViewSet):
     """
     Получение списка транзакций
     GET запрос к  http://127.0.0.1:8000/balance/customers/<int:customer_id>/transactions/?order=timestamp.
-    Для сортировки по дате необходимо указать параметр запроса ?order=timestamp, для сортировки по дате ?order=amount.
+    Для сортировки по дате необходимо указать параметр запроса ?order=timestamp, для сортировки по сумме ?order=amount.
     Для сортировки по убыванию параметр запроса должен начинаться с "-", например ?order=-amount
     """
     queryset = Transaction.objects.all()
@@ -141,6 +144,7 @@ class TransactionViewSet(ReadOnlyModelViewSet):
     def get_queryset(self):
         customer = self.kwargs['customer_id']
         order = self.request.query_params.get('order')
-        if order == 'timestamp' or order == 'amount' or order[1:] == 'timestamp' or order[1:] == 'amount':
-            return self.queryset.filter(Q(recipient=customer) | Q(sender=customer)).order_by(order)
+        if order:
+            if order == 'timestamp' or order == 'amount' or order[1:] == 'timestamp' or order[1:] == 'amount':
+                return self.queryset.filter(Q(recipient=customer) | Q(sender=customer)).order_by(order)
         return self.queryset.filter(Q(recipient=customer) | Q(sender=customer))
