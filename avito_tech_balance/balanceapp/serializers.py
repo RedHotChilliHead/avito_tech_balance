@@ -6,7 +6,6 @@ class CustomerSerializer(serializers.ModelSerializer):
     """
     Сериализатор пользователей
     """
-    # valute = serializers.CharField(required=False, default="RUB")
     valute = serializers.SerializerMethodField()
 
     def get_valute(self, obj):
