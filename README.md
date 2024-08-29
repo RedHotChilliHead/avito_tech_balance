@@ -206,8 +206,8 @@ curl -X POST -H 'Content-Type: application/json' -d '{"amount": 1000000, "operat
 
 #### URL
 
-```http
-`POST /balance/transfer/`
+```
+POST /balance/transfer/
 ```
 
 #### Пример запроса
