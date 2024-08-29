@@ -130,3 +130,7 @@ cython_debug/
 .idea/
 
 note.txt
+
+Task.txt
+
+.DS_Store

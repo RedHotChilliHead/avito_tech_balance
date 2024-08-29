@@ -39,31 +39,11 @@ services:
     networks:
       - default
 
-  test:
-    build:
-      dockerfile: ./Dockerfile
-    command: >
-      sh -c '/wait-for-it.sh db:5432 -- python manage.py test'
-    environment:
-      - DATABASE_NAME=balance_db
-      - DATABASE_USER=postgres
-      - DATABASE_PASSWORD=admin
-      - DATABASE_HOST=db
-      - DATABASE_PORT=5432
-    depends_on:
-      - db
-    networks:
-      - default
-
 networks:
   default:
     driver: bridge
 
 volumes:
   balance_postgres_data:
-    external: true
-
-# docker volume create balance_postgres_data
-# docker-compose up -d
 
 
