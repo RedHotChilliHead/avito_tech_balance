@@ -25,9 +25,14 @@ services:
     build:
       dockerfile: ./Dockerfile
     command: >
-      sh -c '/wait-for-it.sh db:5432 -- python manage.py runserver 0.0.0.0:8080'
-    ports:
-      - "8000:8080"
+      sh -c '/wait-for-it.sh db:5432 -- gunicorn avito_tech_balance.wsgi --bind unix:/gunicorn_socket/gunicorn_socket.sock'
+#      sh -c '/wait-for-it.sh db:5432 -- gunicorn avito_tech_balance.wsgi --bind 0.0.0.0:8000'
+#      sh -c '/wait-for-it.sh db:5432 -- python manage.py runserver 0.0.0.0:8080'
+    expose:
+      - 8000
+    volumes:
+      - static_volume:/balanceapp/static
+      - gunicorn_socket:/gunicorn_socket
     environment:
       - DATABASE_NAME=balance_db
       - DATABASE_USER=postgres
@@ -39,11 +44,23 @@ services:
     networks:
       - default
 
+  nginx:
+    build: ./nginx
+    ports:
+      - "1337:80"
+    volumes:
+      - static_volume:/balanceapp/static
+      - gunicorn_socket:/gunicorn_socket
+    depends_on:
+      - balanceapp
+
 networks:
   default:
     driver: bridge
 
 volumes:
   balance_postgres_data:
+  static_volume:
+  gunicorn_socket:
 
 
